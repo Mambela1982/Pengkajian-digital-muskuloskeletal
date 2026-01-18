@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MS-CHECK V.9 - Final System</title>
+    <style>
+        :root { --primary: #2c3e50; --accent: #3498db; --danger: #e74c3c; --success: #27ae60; --gray: #95a5a6; }
+        body { font-family: 'Segoe UI', sans-serif; background: #dcdde1; margin: 0; padding: 10px; display: flex; justify-content: center; }
+        .card { width: 100%; max-width: 500px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow: hidden; }
+        .header { background: var(--primary); color: white; padding: 15px; text-align: center; border-bottom: 5px solid var(--accent); }
+        .page { display: none; padding: 20px; min-height: 500px; }
+        .active { display: block; }
+        
+        .section-title { color: var(--primary); border-left: 5px solid var(--accent); padding-left: 10px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; font-size: 14px; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-size: 11px; font-weight: bold; color: #555; margin-bottom: 4px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        
+        .nav-footer { padding: 15px; background: #f9f9f9; display: flex; justify-content: space-between; gap: 10px; border-top: 1px solid #eee; }
+        .btn { padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1; font-size: 13px; transition: 0.2s; }
+        .btn-next { background: var(--accent); color: white; }
+        .btn-prev { background: var(--gray); color: white; }
+        .btn-save { background: var(--success); color: white; width: 100%; display: block; margin-top: 10px; font-size: 16px; }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .hint { font-size: 10px; color: #888; font-style: italic; }
+        .alert { background: #fff3f3; color: var(--danger); padding: 12px; border-radius: 8px; border: 1px solid var(--danger); margin-top: 10px; font-weight: bold; font-size: 12px; }
+        .history-card { border: 1px solid #eee; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 12px; border-left: 5px solid var(--accent); }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="header"><h3 style="margin:0;">MS-CHECK (V.9)</h3></div>
+
+    <div id="p1" class="page active">
+        <div class="section-title">Login Petugas</div>
+        <div class="form-group"><label>Nama Perawat</label><input type="text" id="nurse" placeholder="Ketik nama anda..."></div>
+        <div class="form-group"><label>PIN Akses (1234)</label><input type="password" id="pin" placeholder="****"></div>
+        <button class="btn btn-next" style="width:100%" onclick="doLogin()">MASUK SISTEM</button>
+        <button class="btn" style="width:100%; margin-top:10px; background:var(--primary); color:white;" onclick="showHistory()">RIWAYAT PASIEN</button>
+        <div id="login_err" class="alert" style="display:none; text-align:center;">Nama dan PIN (1234) wajib diisi!</div>
+    </div>
+
+    <div id="p2" class="page">
+        <div class="section-title">Identitas Pasien</div>
+        <div class="form-group"><label>Nama Pasien</label><input type="text" id="p_name"></div>
+        <div class="form-group"><label>No. RM</label><input type="text" id="p_rm"></div>
+        <div class="grid-2">
+            <div class="form-group"><label>Tgl Lahir</label><input type="date" id="p_dob" onchange="calcAge()"></div>
+            <div class="form-group"><label>Umur</label><input type="text" id="p_age" readonly style="background:#f0f0f0;"></div>
+        </div>
+        <div class="form-group">
+            <label>Mekanisme Trauma</label>
+            <select id="p_trauma">
+                <option value="Kecelakaan Lalu Lintas">Kecelakaan Lalu Lintas</option>
+                <option value="Jatuh (Fall)">Jatuh (Fall)</option>
+                <option value="Cedera Olahraga">Cedera Olahraga</option>
+                <option value="Lainnya">Lainnya</option>
+            </select>
+        </div>
+        <div class="nav-footer">
+            <button class="btn btn-prev" onclick="goPage('p1')">KELUAR</button>
+            <button class="btn btn-next" onclick="goPage('p3')">LANJUT</button>
+        </div>
+    </div>
+
+    <div id="p3" class="page">
+        <div class="section-title">Vital Sign</div>
+        <div class="form-group"><label>Lokasi Trauma</label><input type="text" id="v_loc" placeholder="Misal: Femur Dextra"></div>
+        <div class="grid-2">
+            <div class="form-group"><label>TD (mmHg)</label><input type="text" id="v_td" placeholder="120/80"></div>
+            <div class="form-group"><label>Nadi (x/mnt)</label><input type="number" id="v_nadi"></div>
+        </div>
+        <div class="grid-2">
+            <div class="form-group"><label>Suhu (°C)</label><input type="number" step="0.1" id="v_temp"></div>
+            <div class="form-group"><label>RR (x/mnt)</label><input type="number" id="v_rr"></div>
+        </div>
+        <div class="grid-2">
+            <div class="form-group"><label>SpO2 (%)</label><input type="number" id="v_spo2"></div>
+            <div class="form-group"><label>CRT</label>
+                <select id="v_crt"><option value="Normal">Normal (< 2 dtk)</option><option value="Lambat">Lambat (> 2 dtk)</option></select>
+            </div>
+        </div>
+        <div class="nav-footer">
+            <button class="btn btn-prev" onclick="goPage('p2')">KEMBALI</button>
+            <button class="btn btn-next" onclick="goPage('p4')">LANJUT</button>
+        </div>
+    </div>
+
+    <div id="p4" class="page">
+        <div class="section-title">Pengkajian Nyeri (PQRST)</div>
+        <div class="form-group"><label>P (Provocative/Palliative)</label><input type="text" id="q_p" placeholder="Pemicu/Pereda"></div>
+        <div class="form-group"><label>Q (Quality)</label><input type="text" id="q_q" placeholder="Tajam/Tumpul/Cenat-cenut"></div>
+        <div class="form-group"><label>R (Region/Radiating)</label><input type="text" id="q_r" placeholder="Lokasi & Penyebaran"></div>
+        <div class="grid-2">
+            <div class="form-group"><label>S (Severity/Skala 0-10)</label><input type="number" id="q_s" min="0" max="10"></div>
+            <div class="form-group"><label>T (Time)</label><input type="text" id="q_t" placeholder="Durasi/Frekuensi"></div>
+        </div>
+        <div class="nav-footer">
+            <button class="btn btn-prev" onclick="goPage('p3')">KEMBALI</button>
+            <button class="btn btn-next" onclick="goPage('p5')">LANJUT</button>
+        </div>
+    </div>
+
+    <div id="p5" class="page">
+        <div class="section-title">Skrining Neurovaskular (6P)</div>
+        <div id="checks">
+            <label style="display:block; margin-bottom:12px;"><input type="checkbox" class="kp"> <b>Pain</b> (Nyeri tak tertahankan)</label>
+            <label style="display:block; margin-bottom:12px;"><input type="checkbox" class="kp"> <b>Pallor</b> (Pucat & Dingin)</label>
+            <label style="display:block; margin-bottom:12px;"><input type="checkbox" class="kp"> <b>Pulselessness</b> (Nadi Hilang)</label>
+            <label style="display:block; margin-bottom:12px;"><input type="checkbox" class="kp"> <b>Paresthesia</b> (Kesemutan/Baal)</label>
+            <label style="display:block; margin-bottom:12px;"><input type="checkbox" class="kp"> <b>Paralysis</b> (Lumpuh)</label>
+            <label style="display:block; margin-bottom:12px;"><input type="checkbox" class="kp"> <b>Poikilothermia</b> (Suhu tak stabil)</label>
+        </div>
+        <div class="nav-footer">
+            <button class="btn btn-prev" onclick="goPage('p4')">KEMBALI</button>
+            <button class="btn btn-next" onclick="prepareReview()">REVIEW</button>
+        </div>
+    </div>
+
+    <div id="p6" class="page">
+        <div class="section-title">Ringkasan Akhir</div>
+        <div id="review_box" style="background:#f4f7f6; padding:15px; border-radius:10px; font-size:12px; line-height:1.6; border:1px solid #ddd;"></div>
+        <div id="alert_danger" class="alert" style="display:none;">🚨 PERINGATAN: Pasien Berisiko Sindrom Kompartemen!</div>
+        <button class="btn btn-save" onclick="saveToDB()">SIMPAN & PASIEN BARU</button>
+        <div class="nav-footer" style="background:none;"><button class="btn btn-prev" onclick="goPage('p5')">EDIT DATA</button></div>
+    </div>
+
+    <div id="p7" class="page">
+        <div class="section-title">Riwayat Pengkajian</div>
+        <div id="history_list" style="max-height: 420px; overflow-y: auto;"></div>
+        <div class="nav-footer"><button class="btn btn-prev" onclick="goPage('p1')">KEMBALI</button></div>
+    </div>
+</div>
+
+<script>
+    let db = JSON.parse(localStorage.getItem('ms_check_v9')) || [];
+    let perawat = "";
+
+    function goPage(id) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        window.scrollTo(0,0);
+    }
+
+    function doLogin() {
+        const n = document.getElementById('nurse').value;
+        const p = document.getElementById('pin').value;
+        if(n.trim() !== "" && p === "1234") {
+            perawat = n;
+            goPage('p2');
+        } else {
+            document.getElementById('login_err').style.display = 'block';
+        }
+    }
+
+    function calcAge() {
+        const dob = document.getElementById('p_dob').value;
+        if(!dob) return;
+        const diff = new Date() - new Date(dob);
+        const age = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+        document.getElementById('p_age').value = age + " Thn";
+    }
+
+    function prepareReview() {
+        const pks = document.querySelectorAll('.kp:checked').length;
+        const skala = document.getElementById('q_s').value;
+        const out = document.getElementById('review_box');
+        
+        out.innerHTML = `
+            <b>Petugas:</b> ${perawat}<br>
+            <b>Pasien:</b> ${document.getElementById('p_name').value} (${document.getElementById('p_rm').value})<br>
+            <b>TTV:</b> TD ${document.getElementById('v_td').value}, HR ${document.getElementById('v_nadi').value}, S ${document.getElementById('v_temp').value}, SpO2 ${document.getElementById('v_spo2').value}<br><hr>
+            <b>PQRST Nyeri:</b><br>
+            P:${document.getElementById('q_p').value} | Q:${document.getElementById('q_q').value}<br>
+            R:${document.getElementById('q_r').value} | S:Skala ${skala} | T:${document.getElementById('q_t').value}<br><hr>
+            <b>6P Screening:</b> ${pks} tanda ditemukan.
+        `;
+        document.getElementById('alert_danger').style.display = (pks > 0 || skala >= 7) ? 'block' : 'none';
+        goPage('p6');
+    }
+
+    function saveToDB() {
+        const data = {
+            tgl: new Date().toLocaleString('id-ID'),
+            nurs: perawat,
+            pasi: document.getElementById('p_name').value,
+            rm: document.getElementById('p_rm').value,
+            skl: document.getElementById('q_s').value,
+            p6: document.querySelectorAll('.kp:checked').length
+        };
+        db.push(data);
+        localStorage.setItem('ms_check_v9', JSON.stringify(db));
+        alert("Data Tersimpan Berhasil!");
+        location.reload();
+    }
+
+    function showHistory() {
+        const list = document.getElementById('history_list');
+        list.innerHTML = db.length === 0 ? "Belum ada data." : "";
+        db.slice().reverse().forEach(i => {
+            list.innerHTML += `
+                <div class="history-card">
+                    <b>${i.pasi} (${i.rm})</b><br>
+                    <small>${i.tgl}</small><br>
+                    Nyeri: ${i.skl}/10 | 6P: ${i.p6} | Perawat: ${i.nurs}
+                </div>`;
+        });
+        goPage('p7');
+    }
+</script>
+
+</body>
+</html>
